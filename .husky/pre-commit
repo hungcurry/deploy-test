@@ -1,0 +1,9 @@
+#!/bin/sh
+
+branch=$(git symbolic-ref --short HEAD)
+
+if [ "$branch" = "main" ]; then
+  echo "🚫 你現在在 main 分支，請不要直接 commit！"
+  exit 1
+fi
+
