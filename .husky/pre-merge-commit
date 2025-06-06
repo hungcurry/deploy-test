@@ -1,0 +1,9 @@
+#!/bin/sh
+
+branch=$(git symbolic-ref --short HEAD)
+
+if [ "$branch" = "main" ]; then
+  echo "🚫 禁止直接在 main 分支進行 merge！請使用 Pull Request 流程"
+  exit 1
+fi
+
