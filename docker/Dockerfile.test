@@ -1,0 +1,20 @@
+# Dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+
+# 要讓 GHCR 的 image「綁定某個 GitHub repo」
+LABEL org.opencontainers.image.source="https://github.com/hungcurry/deploy-test"
+LABEL env="test"
+
+# 複製所有檔案
+COPY . .
+# 設定環境變數
+ENV APP_ENV=test
+ENV PORT=3002
+
+EXPOSE 3002
+CMD ["node", "index.js"]
+
+

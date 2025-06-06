@@ -1,0 +1,73 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - main  # PR 合併後才會觸發
+  pull_request:
+    branches:
+      - main  # PR 開啟時觸發測試
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'  # 💡 PR 開啟或更新時執行測試
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run basic check (mock test)
+        run: |
+          echo "🧪 Running tests before merging..."
+          echo "✅ Test passed!"
+
+  build:
+    if: github.event_name == 'push'  # 💡 只有 push 時才執行 build & push
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set ENV
+        id: set_env
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "env=prod" >> $GITHUB_OUTPUT
+          else
+            echo "env=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Export ENV
+        run: echo "ENV=${{ steps.set_env.outputs.env }}" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build Docker image
+        run: |
+          echo "🚀 Building image for environment: $ENV"
+          docker build -f docker/Dockerfile.${{ env.ENV }} -t ghcr-test-${{ env.ENV }} .
+
+      - name: Tag image for GHCR
+        run: |
+          docker tag ghcr-test-${{ env.ENV }} ghcr.io/hungcurry/ghcr-test-${{ env.ENV }}:latest
+          docker tag ghcr-test-${{ env.ENV }} ghcr.io/hungcurry/ghcr-test-${{ env.ENV }}:${{ github.sha }}
+
+      - name: Push image to GHCR
+        run: |
+          echo "📦 Pushing :latest"
+          docker push ghcr.io/hungcurry/ghcr-test-${{ env.ENV }}:latest
+
+          echo "📦 Pushing :${{ github.sha }}"
+          docker push ghcr.io/hungcurry/ghcr-test-${{ env.ENV }}:${{ github.sha }}

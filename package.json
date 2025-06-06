@@ -1,0 +1,23 @@
+{
+  "name": "ghcr-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "cross-env APP_ENV=dev node index.js",
+    "test": "cross-env APP_ENV=test node index.js",
+    "prod": "cross-env APP_ENV=prod node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "husky": "^9.1.7"
+  }
+}
