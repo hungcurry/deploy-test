@@ -18,10 +18,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run basic check (mock test)
-        run: |
-          echo "🧪 Running tests before merging..."
-          echo "✅ Test passed!"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          # ✅ 改成你專案使用的 Node.js 版本
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest tests
+        run: npm run jest  # 即執行script jest
 
   build:
     if: github.event_name == 'push'  # 💡 只有 push 時才執行 build & push
